@@ -7,7 +7,10 @@ export default function CalorieCalculator() {
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
+  const [gender, setGender] = useState("male");
+  const [activityLevel, setActivityLevel] = useState("1.2");
   const [calories, setCalories] = useState(null);
+  const [bmr, setBmr] = useState(null);
 
   const calculateCalories = () => {
     if (!age || !weight || !height) {
@@ -15,8 +18,19 @@ export default function CalorieCalculator() {
       return;
     }
 
-    const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-    setCalories(Math.round(bmr));
+    // Mifflin-St Jeor Equation
+    let calculatedBMR;
+    if (gender === "male") {
+      calculatedBMR = 10 * parseFloat(weight) + 6.25 * parseFloat(height) - 5 * parseFloat(age) + 5;
+    } else {
+      calculatedBMR = 10 * parseFloat(weight) + 6.25 * parseFloat(height) - 5 * parseFloat(age) - 161;
+    }
+
+    // Total Daily Energy Expenditure (TDEE) = BMR × Activity Level
+    const tdee = calculatedBMR * parseFloat(activityLevel);
+
+    setBmr(Math.round(calculatedBMR));
+    setCalories(Math.round(tdee));
   };
 
   return (
@@ -78,9 +92,36 @@ export default function CalorieCalculator() {
                 />
               </div>
 
+              <div className="relative group">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Gender</label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+
+              <div className="relative group">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Activity Level</label>
+                <select
+                  value={activityLevel}
+                  onChange={(e) => setActivityLevel(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
+                >
+                  <option value="1.2">Sedentary (little or no exercise)</option>
+                  <option value="1.375">Lightly active (1-3 days/week)</option>
+                  <option value="1.55">Moderately active (3-5 days/week)</option>
+                  <option value="1.725">Very active (6-7 days/week)</option>
+                  <option value="1.9">Super active (intense exercise daily)</option>
+                </select>
+              </div>
+
               <button
                 onClick={calculateCalories}
-                className="w-full bg-primary hover:bg-primary-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-[0.98] mt-4"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white border-none font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] mt-4"
               >
                 Calculate Calories
               </button>
@@ -89,12 +130,21 @@ export default function CalorieCalculator() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mt-8 p-6 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-2xl text-center"
+                  className="mt-8 space-y-4"
                 >
-                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-1">Your Estimated BMR</p>
-                  <p className="text-4xl font-bold text-primary">
-                    {calories} <span className="text-lg font-medium opacity-70">kcal</span>
-                  </p>
+                  <div className="p-6 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-2xl text-center">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-1">Your BMR (Basal Metabolic Rate)</p>
+                    <p className="text-3xl font-bold text-primary">
+                      {bmr} <span className="text-lg font-medium opacity-70">kcal/day</span>
+                    </p>
+                  </div>
+                  <div className="p-6 bg-green-50 dark:bg-green-900/20 border border-green-500/20 rounded-2xl text-center">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-1">Daily Calorie Needs (TDEE)</p>
+                    <p className="text-4xl font-bold text-green-600 dark:text-green-400">
+                      {calories} <span className="text-lg font-medium opacity-70">kcal/day</span>
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Based on your activity level</p>
+                  </div>
                 </motion.div>
               )}
             </div>

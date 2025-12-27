@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiActivity, FiZap, FiTarget, FiTrendingUp, FiSmartphone, FiCheck } from 'react-icons/fi';
+import { FiActivity, FiZap, FiTarget, FiTrendingUp, FiSmartphone, FiCheck, FiDroplet } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
+import calVisual from '../assets/calorie-tracking.png';
+import workoutVisual from '../assets/workout-logistics.png';
+import hydrationVisual from '../assets/hydration-tracking.png';
 
 const LandingPage = () => {
   return (
@@ -24,12 +27,15 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-base-200 border border-base-300">
-                <span className="text-sm font-medium text-primary flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  AI-Powered Fitness Tracking
-                </span>
-              </div>
+              <Link to="/ai-suggestions">
+                <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-base-200 border border-base-300 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300 cursor-pointer group">
+                  <span className="text-sm font-medium text-primary flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    AI-Powered Fitness Tracking
+                    <FiZap className="w-3 h-3 transition-transform group-hover:scale-125" />
+                  </span>
+                </div>
+              </Link>
               <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tight mb-8 leading-tight">
                 Transform Your Body <br />
                 <span className="text-gradient">Master Your Health</span>
@@ -58,18 +64,20 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="mt-20 relative max-w-5xl mx-auto"
+            className="mt-20 relative max-w-5xl mx-auto group"
           >
-            <div className="bg-base-200 rounded-2xl p-2 sm:p-4 shadow-2xl border border-base-300">
-              <div className="bg-base-100 rounded-xl overflow-hidden aspect-[16/9] relative grid place-items-center bg-grid-pattern">
-                <div className="absolute inset-0 bg-base-100/50" />
-                <div className="relative text-center z-10 p-8">
-                  <FiActivity className="w-20 h-20 text-primary mx-auto mb-4 opacity-80" />
-                  <h3 className="text-2xl font-bold mb-2">Interactive Dashboard</h3>
-                  <p className="text-gray-500 dark:text-gray-400">Connect to visualize your progress in real-time</p>
+            <Link to="/dashboard" aria-label="Go to interactive dashboard">
+              <div className="bg-base-200 rounded-2xl p-2 sm:p-4 shadow-2xl border border-base-300 transition-all duration-300 group-hover:shadow-primary/20 group-hover:border-primary/30">
+                <div className="bg-base-100 rounded-xl overflow-hidden aspect-[16/9] relative grid place-items-center bg-grid-pattern group-hover:bg-primary/5 transition-colors duration-300">
+                  <div className="absolute inset-0 bg-base-100/50" />
+                  <div className="relative text-center z-10 p-8">
+                    <FiActivity className="w-20 h-20 text-primary mx-auto mb-4 opacity-80 transition-transform duration-300 group-hover:scale-110" />
+                    <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors duration-300">Interactive Dashboard</h3>
+                    <p className="text-gray-500 dark:text-gray-400">Connect to visualize your progress in real-time</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
             {/* Floating Elements */}
             <motion.div
               animate={{ y: [-10, 10, -10] }}
@@ -111,6 +119,8 @@ const LandingPage = () => {
               color="text-warning"
               bg="bg-warning/10"
               delay={0}
+              to="/food-log"
+              img={calVisual}
             />
             <FeatureCard
               icon={<FiActivity />}
@@ -119,14 +129,18 @@ const LandingPage = () => {
               color="text-primary"
               bg="bg-primary/10"
               delay={0.1}
+              to="/workout-log"
+              img={workoutVisual}
             />
             <FeatureCard
-              icon={<FiTarget />}
-              title="AI Recommendations"
-              description="Get personalized diet tips and workout plans generated by our advanced AI engine."
-              color="text-accent"
-              bg="bg-accent/10"
+              icon={<FiDroplet />}
+              title="Hydration Tracking"
+              description="Stay peak performing with our smart water intake log and hydration reminders tailored to your weight."
+              color="text-info"
+              bg="bg-info/10"
               delay={0.2}
+              to="/hydration-tracker"
+              img={hydrationVisual}
             />
           </div>
         </div>
@@ -243,24 +257,39 @@ const LandingPage = () => {
 };
 
 // Feature Card Component
-const FeatureCard = ({ icon, title, description, color, bg, delay }) => {
+const FeatureCard = ({ icon, title, description, color, bg, delay, to, img }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
-      className="card bg-base-100 border border-base-200 shadow-xl hover:shadow-2xl transition-all duration-300 card-hover"
+      className="card bg-base-100 border border-base-200 shadow-xl hover:shadow-2xl transition-all duration-300 card-hover group overflow-hidden"
     >
-      <div className="card-body p-8">
-        <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center mb-6`}>
-          <div className={`${color} text-2xl`}>{icon}</div>
+      <Link to={to} className="p-0 cursor-pointer flex flex-col h-full">
+        {img && (
+          <div className="h-48 overflow-hidden relative">
+            <img
+              src={img}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className={`absolute inset-0 ${bg} opacity-20 group-hover:opacity-10 transition-opacity`} />
+          </div>
+        )}
+        <div className="card-body p-8">
+          <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-300`}>
+            <div className={`${color} text-2xl`}>{icon}</div>
+          </div>
+          <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{title}</h3>
+          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+            {description}
+          </p>
+          <div className="mt-4 text-primary font-semibold flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            Explore <FiZap size={14} />
+          </div>
         </div>
-        <h3 className="text-xl font-bold mb-3">{title}</h3>
-        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-          {description}
-        </p>
-      </div>
+      </Link>
     </motion.div>
   );
 };

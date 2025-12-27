@@ -7,6 +7,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { registerUser } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -41,21 +43,25 @@ export default function RegisterPage() {
 
   const passwordStrength = getPasswordStrength(password);
 
+  const { login } = useAuth();
+
   const onSubmit = async (data) => {
     setIsLoading(true);
     setServerError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await registerUser({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        biometrics: { weight: 70, height: 175 },
+        goals: { targetWeight: 65, caloriesPerDay: 2000 }
+      });
 
-      // Mock registration success
-      console.log('Register data:', data);
-
-      // Navigate to login on success
-      navigate('/login');
+      login(response.data.user);
+      navigate('/dashboard');
     } catch (error) {
-      setServerError('Registration failed. Please try again.');
+      setServerError(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

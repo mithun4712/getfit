@@ -23,10 +23,10 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState({
     caloriesConsumed: 0,
-    caloriesBurned: 320, // Mock for now
+    caloriesBurned: 0,
     caloriesGoal: 2000,
     workoutsCompleted: 0,
-    waterIntake: 6,
+    waterIntake: 0,
     waterGoal: 8,
   });
 
@@ -40,9 +40,39 @@ export default function Dashboard() {
         const todaysLogs = logs.filter(log => new Date(log.date).toDateString() === today);
         const consumed = todaysLogs.reduce((sum, log) => sum + log.totalCalories, 0);
 
+        // Load hydration data from localStorage
+        const savedHydration = localStorage.getItem('hydration_data');
+        let waterIntake = 0;
+        if (savedHydration) {
+          try {
+            const { date, amount } = JSON.parse(savedHydration);
+            if (date === today) {
+              waterIntake = amount;
+            }
+          } catch (error) {
+            console.error('Error loading hydration data:', error);
+          }
+        }
+
+        // Load workout calories from localStorage
+        const savedWorkouts = localStorage.getItem('workout_calories');
+        let caloriesBurned = 0;
+        if (savedWorkouts) {
+          try {
+            const { date, calories } = JSON.parse(savedWorkouts);
+            if (date === today) {
+              caloriesBurned = calories;
+            }
+          } catch (error) {
+            console.error('Error loading workout calories:', error);
+          }
+        }
+
         setDashboardData(prev => ({
           ...prev,
-          caloriesConsumed: consumed
+          caloriesConsumed: consumed,
+          waterIntake: waterIntake,
+          caloriesBurned: caloriesBurned
         }));
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -50,6 +80,10 @@ export default function Dashboard() {
     };
 
     loadDashboardData();
+
+    // Refresh dashboard every 30 seconds to catch updates
+    const interval = setInterval(loadDashboardData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const caloriesRemaining = dashboardData.caloriesGoal - (dashboardData.caloriesConsumed - dashboardData.caloriesBurned);
@@ -213,6 +247,62 @@ export default function Dashboard() {
             </motion.div>
           </div>
 
+          {/* AI Insights & Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+          >
+            <div className="card bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 md:col-span-2 border border-primary/20">
+              <div className="card-body">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="card-title text-primary dark:text-primary-focus flex items-center gap-2">
+                    <FiZap /> AI Smart Insights
+                  </h3>
+                  <Link to="/ai-suggestions" className="btn btn-ghost btn-xs">More Tips</Link>
+                </div>
+                <div className="flex flex-col md:flex-row gap-6 items-center">
+                  <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-lg shrink-0">
+                    <FiTrendingUp className="text-accent w-8 h-8" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-lg mb-1">Weekly Momentum is Building!</p>
+                    <p className="text-sm opacity-80 leading-relaxed">
+                      You've stayed within your calorie limit for 4 days straight. Based on your progress,
+                      increasing protein by 10% this weekend could help speed up muscle recovery.
+                    </p>
+                  </div>
+                  <Link to="/ai-workouts">
+                    <Button variant="primary" size="sm" className="rounded-full shadow-lg shadow-primary/20 whitespace-nowrap">
+                      Get AI Workout
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="card bg-white dark:bg-gray-800 shadow-lg">
+              <div className="card-body">
+                <h3 className="card-title text-sm opacity-70 mb-2 uppercase tracking-wider">Today's Focus</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-success"></div>
+                    <p className="text-sm font-medium">Protein: 80/120g</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-warning"></div>
+                    <p className="text-sm font-medium">Cardio: 0/30 min</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                    <p className="text-sm font-medium">Next: AI Leg Routine</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Bottom Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Today's Workouts */}
@@ -288,35 +378,6 @@ export default function Dashboard() {
                         showPercentage={false}
                       />
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="card bg-gradient-primary text-primary-content shadow-lg">
-                <div className="card-body">
-                  <h3 className="card-title mb-4 text-white">Quick Actions</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Link to="/food-log">
-                      <Button variant="ghost" className="w-full bg-white/20 hover:bg-white/30 border-0 text-white">
-                        Log Food
-                      </Button>
-                    </Link>
-                    <Link to="/workout-log">
-                      <Button variant="ghost" className="w-full bg-white/20 hover:bg-white/30 border-0 text-white">
-                        Log Workout
-                      </Button>
-                    </Link>
-                    <Link to="/ai-suggestions">
-                      <Button variant="ghost" className="w-full bg-white/20 hover:bg-white/30 border-0 text-white">
-                        AI Tips
-                      </Button>
-                    </Link>
-                    <Link to="/ai-workouts">
-                      <Button variant="ghost" className="w-full bg-white/20 hover:bg-white/30 border-0 text-white">
-                        Get Workout
-                      </Button>
-                    </Link>
                   </div>
                 </div>
               </div>

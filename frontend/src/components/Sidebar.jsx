@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiHome, FiActivity, FiTrendingUp, FiClipboard, FiZap, FiTarget } from 'react-icons/fi';
+import { FiHome, FiActivity, FiTrendingUp, FiClipboard, FiZap, FiTarget, FiDroplet } from 'react-icons/fi';
 
 const Sidebar = ({ isOpen, onClose }) => {
     const location = useLocation();
@@ -9,12 +9,12 @@ const Sidebar = ({ isOpen, onClose }) => {
     const menuItems = [
         { path: '/dashboard', icon: <FiHome size={20} />, label: 'Dashboard' },
         { path: '/calorie-calculator', icon: <FiTarget size={20} />, label: 'Calorie Calculator' },
-        { path: '/calories-count', icon: <FiTrendingUp size={20} />, label: 'Calories Count' },
         { path: '/food-log', icon: <FiClipboard size={20} />, label: 'Food Log' },
         { path: '/workout-log', icon: <FiActivity size={20} />, label: 'Workout Log' },
         { path: '/weight-log', icon: <FiTrendingUp size={20} />, label: 'Weight Log' },
         { path: '/ai-suggestions', icon: <FiZap size={20} />, label: 'AI Suggestions' },
         { path: '/ai-workouts', icon: <FiZap size={20} />, label: 'AI Workouts' },
+        { path: '/hydration-tracker', icon: <FiDroplet size={20} />, label: 'Hydration Tracker' },
     ];
 
     return (

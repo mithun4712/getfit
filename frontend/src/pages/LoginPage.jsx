@@ -7,6 +7,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { loginUser } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,16 +16,18 @@ export default function LoginPage() {
   const [serverError, setServerError] = useState('');
   const { register, handleSubmit, formState: { errors } } = useForm();
 
+  const { login } = useAuth();
+
   const onSubmit = async (data) => {
     setIsLoading(true);
     setServerError('');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Login data:', data);
+      const response = await loginUser(data);
+      login(response.data.user);
       navigate('/dashboard');
     } catch (error) {
-      setServerError('Invalid email or password. Please try again.');
+      setServerError(error.message || 'Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { FiCoffee, FiPlus, FiPieChart, FiTrash2 } from "react-icons/fi";
 import Navbar from "../components/Navbar";
 import { fetchFoodLogs, addFoodLog, deleteFoodLog } from "../services/api";
+import calVisual from "../assets/calorie-tracking.png";
 
 export default function FoodLog() {
   const [logs, setLogs] = useState([]);
@@ -26,18 +27,27 @@ export default function FoodLog() {
 
   const handleAddLog = async (e) => {
     e.preventDefault();
-    if (!newItem.name || !newItem.calories) return;
+    console.log('Add food log clicked!', newItem);
+
+    if (!newItem.name || !newItem.calories) {
+      alert('Please fill in both food name and calories');
+      return;
+    }
 
     try {
-      await addFoodLog({
+      console.log('Submitting food log...');
+      const result = await addFoodLog({
         mealType: newItem.mealType,
         items: [{ name: newItem.name, calories: parseInt(newItem.calories) }],
         date: new Date()
       });
+      console.log('Food log added successfully:', result);
       setNewItem({ name: "", calories: "", mealType: "Breakfast" });
       loadLogs();
+      alert('Food entry added successfully!');
     } catch (error) {
       console.error("Error adding log:", error);
+      alert(`Error adding food entry: ${error.message}`);
     }
   };
 
@@ -60,61 +70,84 @@ export default function FoodLog() {
           className="w-full max-w-4xl"
         >
           {/* Header Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-gray-700 text-center mb-8">
-            <div className="w-16 h-16 bg-success/10 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-              <FiCoffee className="text-success w-8 h-8" />
-            </div>
-            <h1 className="text-3xl font-bold font-display text-gray-900 dark:text-white mb-2">Food Log</h1>
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 mb-8 overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+              <div className="flex-1 p-8 md:p-12 text-left">
+                <div className="w-16 h-16 bg-success/10 rounded-2xl flex items-center justify-center mb-6">
+                  <FiCoffee className="text-success w-8 h-8" />
+                </div>
+                <h1 className="text-3xl font-bold font-display text-gray-900 dark:text-white mb-2">Food Log</h1>
+                <p className="text-gray-500 mb-6">Track your nutrition with precision. Every calorie counts toward your goal.</p>
 
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 max-w-md mx-auto mt-6">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-gray-900 dark:text-white font-bold flex items-center gap-2">
-                  <FiPieChart className="text-success" />
-                  Today's Calories
-                </span>
-                <span className="text-sm text-gray-500">{totalCalories} / 2,000 kcal</span>
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-6 border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-gray-900 dark:text-white font-bold flex items-center gap-2">
+                      <FiPieChart className="text-success" />
+                      Today's Calories
+                    </span>
+                    <span className="text-sm text-gray-500">{totalCalories} / 2,000 kcal</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 h-2.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-success h-full transition-all duration-500"
+                      style={{ width: `${Math.min((totalCalories / 2000) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 h-2.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-success h-full transition-all duration-500"
-                  style={{ width: `${Math.min((totalCalories / 2000) * 100, 100)}%` }}
-                ></div>
+              <div className="md:w-1/3 relative h-48 md:h-auto">
+                <img
+                  src={calVisual}
+                  alt="Calorie Tracking Visual"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-gray-800 to-transparent md:block hidden" />
               </div>
             </div>
           </div>
 
           {/* Add Log Form */}
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
-            <h3 className="text-xl font-bold mb-4 dark:text-white">Add Entry</h3>
-            <form onSubmit={handleAddLog} className="flex flex-col md:flex-row gap-4">
-              <input
-                type="text"
-                placeholder="Food Name"
-                value={newItem.name}
-                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                className="input input-bordered flex-1 dark:bg-gray-700 dark:text-white"
-                required
-              />
-              <input
-                type="number"
-                placeholder="Calories"
-                value={newItem.calories}
-                onChange={(e) => setNewItem({ ...newItem, calories: e.target.value })}
-                className="input input-bordered w-32 dark:bg-gray-700 dark:text-white"
-                required
-              />
-              <select
-                value={newItem.mealType}
-                onChange={(e) => setNewItem({ ...newItem, mealType: e.target.value })}
-                className="select select-bordered w-40 dark:bg-gray-700 dark:text-white"
+            <h3 className="text-xl font-bold mb-6 dark:text-white flex items-center gap-2">
+              <FiPlus className="text-success" />
+              Add Food Entry
+            </h3>
+            <form onSubmit={handleAddLog} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input
+                  type="text"
+                  placeholder="Food Name (e.g., Chicken Breast)"
+                  value={newItem.name}
+                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                  className="input input-bordered md:col-span-2 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  required
+                />
+                <input
+                  type="number"
+                  placeholder="Calories"
+                  value={newItem.calories}
+                  onChange={(e) => setNewItem({ ...newItem, calories: e.target.value })}
+                  className="input input-bordered dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  required
+                  min="0"
+                />
+                <select
+                  value={newItem.mealType}
+                  onChange={(e) => setNewItem({ ...newItem, mealType: e.target.value })}
+                  className="select select-bordered dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                >
+                  <option>Breakfast</option>
+                  <option>Lunch</option>
+                  <option>Dinner</option>
+                  <option>Snack</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="btn bg-green-600 hover:bg-green-700 text-white border-none w-full md:w-auto px-8 shadow-lg hover:shadow-xl transition-all"
+                onClick={() => console.log('Add button clicked!')}
               >
-                <option>Breakfast</option>
-                <option>Lunch</option>
-                <option>Dinner</option>
-                <option>Snack</option>
-              </select>
-              <button type="submit" className="btn btn-success text-white">
-                <FiPlus className="w-5 h-5" /> Add
+                <FiPlus className="w-5 h-5" /> Add Food Entry
               </button>
             </form>
           </div>
@@ -130,8 +163,8 @@ export default function FoodLog() {
               >
                 <div className="flex items-center gap-4">
                   <div className={`w-2 h-12 rounded-full ${log.mealType === 'Breakfast' ? 'bg-orange-400' :
-                      log.mealType === 'Lunch' ? 'bg-blue-400' :
-                        log.mealType === 'Dinner' ? 'bg-purple-400' : 'bg-green-400'
+                    log.mealType === 'Lunch' ? 'bg-blue-400' :
+                      log.mealType === 'Dinner' ? 'bg-purple-400' : 'bg-green-400'
                     }`}></div>
                   <div>
                     <h4 className="font-bold dark:text-white">{log.mealType}</h4>

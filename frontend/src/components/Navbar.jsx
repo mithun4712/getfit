@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth, UserButton, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useTheme } from '../context/ThemeContext';
 import { FiMenu, FiX } from 'react-icons/fi';
 import DarkModeToggle from './ui/DarkModeToggle';
@@ -8,10 +9,11 @@ import DarkModeToggle from './ui/DarkModeToggle';
 const Navbar = ({ onMenuClick }) => {
   const { theme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
+  // const { user, logout } = useAuth(); // Old Context
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const navLinks = [
-    { name: 'Dashboard', path: '/dashboard' },
     { name: 'Calculator', path: '/calorie-calculator' },
     { name: 'Workouts', path: '/workout-log' },
   ];
@@ -57,17 +59,31 @@ const Navbar = ({ onMenuClick }) => {
             <DarkModeToggle />
 
             {/* Desktop Action Buttons */}
+            {/* Desktop Action Buttons */}
             <div className="hidden sm:flex items-center space-x-2">
-              <Link to="/login">
-                <button className="btn btn-ghost btn-sm rounded-full px-6 hover:bg-base-200 transition-all duration-300">
-                  Login
-                </button>
-              </Link>
-              <Link to="/register">
-                <button className="btn btn-primary btn-sm rounded-full px-6 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300">
-                  Register
-                </button>
-              </Link>
+              <SignedIn>
+                <Link to="/dashboard">
+                  <button className="btn btn-primary btn-sm rounded-full px-6 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300">
+                    Dashboard
+                  </button>
+                </Link>
+                <div className="ml-2">
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+              </SignedIn>
+
+              <SignedOut>
+                <Link to="/login">
+                  <button className="btn btn-ghost btn-sm rounded-full px-6 hover:bg-base-200 transition-all duration-300">
+                    Login
+                  </button>
+                </Link>
+                <Link to="/register">
+                  <button className="btn btn-primary btn-sm rounded-full px-6 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300">
+                    Register
+                  </button>
+                </Link>
+              </SignedOut>
             </div>
 
             {/* Mobile Menu Button */}
@@ -108,12 +124,20 @@ const Navbar = ({ onMenuClick }) => {
               </Link>
             ))}
             <div className="pt-4 space-y-2 border-t border-base-300">
-              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                <button className="btn btn-ghost w-full rounded-lg">Login</button>
-              </Link>
-              <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                <button className="btn btn-primary w-full rounded-lg">Register</button>
-              </Link>
+              <SignedIn>
+                <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <button className="btn btn-primary w-full rounded-lg">Dashboard</button>
+                </Link>
+                {/* Mobile User Button - might be better to just leave it in header, but user requested remove auth part */}
+              </SignedIn>
+              <SignedOut>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <button className="btn btn-ghost w-full rounded-lg">Login</button>
+                </Link>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                  <button className="btn btn-primary w-full rounded-lg">Register</button>
+                </Link>
+              </SignedOut>
             </div>
           </div>
         </motion.div>
