@@ -2,20 +2,27 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FiTrendingUp, FiPlus, FiHash } from "react-icons/fi";
 import Navbar from "../components/Navbar";
-import { fetchWeightLogs, addWeightLog } from "../services/api";
+import { useAuth, useUser } from "@clerk/clerk-react"; // Added Clerk hooks
+import { setAuthToken, fetchWeightLogs, addWeightLog } from "../services/api"; // Added setAuthToken
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function WeightLog() {
+    const { getToken } = useAuth();
+    const { user } = useUser();
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newLog, setNewLog] = useState({ weight: "", unit: "kg" });
 
     useEffect(() => {
-        loadLogs();
-    }, []);
+        if (user) {
+            loadLogs();
+        }
+    }, [user]);
 
     const loadLogs = async () => {
         try {
+            const token = await getToken();
+            if (token) setAuthToken(token);
             const data = await fetchWeightLogs();
             setLogs(data);
         } catch (error) {

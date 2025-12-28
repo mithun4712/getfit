@@ -4,9 +4,11 @@ import { FiZap, FiActivity, FiClock, FiCheckCircle, FiLoader } from "react-icons
 import Navbar from "../components/Navbar";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
-import { generateAIWorkout } from "../services/api";
+import { useAuth } from "@clerk/clerk-react"; // Added Clerk hook
+import { generateAIWorkout, setAuthToken } from "../services/api"; // Added setAuthToken
 
 export default function AIGeneratedWorkouts() {
+  const { getToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [workout, setWorkout] = useState(null);
   const [formData, setFormData] = useState({
@@ -19,6 +21,8 @@ export default function AIGeneratedWorkouts() {
   const handleGenerate = async () => {
     setLoading(true);
     try {
+      const token = await getToken();
+      if (token) setAuthToken(token);
       const response = await generateAIWorkout(formData);
       setWorkout(response.data);
     } catch (error) {

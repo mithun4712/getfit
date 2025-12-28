@@ -4,16 +4,17 @@ import { FiDroplet, FiPlus, FiMinus, FiActivity } from "react-icons/fi";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import hydrationVisual from "../assets/hydration-tracking.png";
+import { getUserItem, setUserItem } from "../utils/userStorage";
 
 export default function HydrationTracker() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [waterAmount, setWaterAmount] = useState(0);
     const [goal, setGoal] = useState(8); // 8 glasses (roughly 2L)
 
-    // Load water amount from localStorage on mount
+    // Load water amount from user-specific localStorage on mount
     useEffect(() => {
         const today = new Date().toDateString();
-        const savedData = localStorage.getItem('hydration_data');
+        const savedData = getUserItem('hydration_data');
 
         if (savedData) {
             try {
@@ -24,20 +25,20 @@ export default function HydrationTracker() {
                 } else {
                     // New day, reset to 0
                     setWaterAmount(0);
-                    localStorage.setItem('hydration_data', JSON.stringify({ date: today, amount: 0 }));
+                    setUserItem('hydration_data', JSON.stringify({ date: today, amount: 0 }));
                 }
             } catch (error) {
                 console.error('Error loading hydration data:', error);
             }
         } else {
-            localStorage.setItem('hydration_data', JSON.stringify({ date: today, amount: 0 }));
+            setUserItem('hydration_data', JSON.stringify({ date: today, amount: 0 }));
         }
     }, []);
 
-    // Save water amount to localStorage whenever it changes
+    // Save water amount to user-specific localStorage whenever it changes
     useEffect(() => {
         const today = new Date().toDateString();
-        localStorage.setItem('hydration_data', JSON.stringify({ date: today, amount: waterAmount }));
+        setUserItem('hydration_data', JSON.stringify({ date: today, amount: waterAmount }));
     }, [waterAmount]);
 
     const addGlass = () => {
