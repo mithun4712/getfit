@@ -29,7 +29,10 @@ export const fetchFoodLogs = async () => {
     const response = await fetch(`${API_URL}/fitness/food`, {
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Failed to fetch food logs');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch food logs');
+    }
     const result = await response.json();
     return result.data;
 };
@@ -40,7 +43,10 @@ export const addFoodLog = async (logData) => {
         headers: getHeaders(),
         body: JSON.stringify(logData)
     });
-    if (!response.ok) throw new Error('Failed to add food log');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to add food log');
+    }
     return response.json();
 };
 
@@ -49,7 +55,10 @@ export const deleteFoodLog = async (id) => {
         method: 'DELETE',
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Failed to delete food log');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to delete food log');
+    }
     return response.json();
 };
 
@@ -59,7 +68,10 @@ export const fetchWorkoutPlans = async () => {
         headers: getHeaders(),
         cache: 'no-store'
     });
-    if (!response.ok) throw new Error('Failed to fetch workout plans');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch workout plans');
+    }
     const result = await response.json();
     return result.data;
 };
@@ -70,7 +82,10 @@ export const createWorkoutPlan = async (planData) => {
         headers: getHeaders(),
         body: JSON.stringify(planData)
     });
-    if (!response.ok) throw new Error('Failed to create workout plan');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to create workout plan');
+    }
     return response.json();
 };
 
@@ -79,7 +94,10 @@ export const fetchWeightLogs = async () => {
     const response = await fetch(`${API_URL}/fitness/weight`, {
         headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Failed to fetch weight logs');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch weight logs');
+    }
     const result = await response.json();
     return result.data;
 };
@@ -90,7 +108,10 @@ export const addWeightLog = async (weightData) => {
         headers: getHeaders(),
         body: JSON.stringify(weightData)
     });
-    if (!response.ok) throw new Error('Failed to add weight log');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to add weight log');
+    }
     return response.json();
 };
 
@@ -101,6 +122,9 @@ export const generateAIWorkout = async (data) => {
         headers: getHeaders(),
         body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Failed to generate AI workout');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to generate AI workout');
+    }
     return response.json();
 };

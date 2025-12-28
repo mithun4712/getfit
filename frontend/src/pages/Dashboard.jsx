@@ -17,9 +17,13 @@ import Footer from '../components/Footer';
 import StatCard from '../components/ui/StatCard';
 import ProgressBar from '../components/ui/ProgressBar';
 import Button from '../components/ui/Button';
-import { fetchFoodLogs } from '../services/api';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import { setAuthToken, fetchFoodLogs } from '../services/api'; // Added setAuthToken
+import { getUserItem } from '../utils/userStorage';
 
 export default function Dashboard() {
+  const { getToken } = useAuth();
+  const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState({
     caloriesConsumed: 0,
@@ -33,6 +37,9 @@ export default function Dashboard() {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
+        const token = await getToken();
+        if (token) setAuthToken(token);
+
         const logs = await fetchFoodLogs();
 
         // Calculate today's calories
@@ -40,8 +47,8 @@ export default function Dashboard() {
         const todaysLogs = logs.filter(log => new Date(log.date).toDateString() === today);
         const consumed = todaysLogs.reduce((sum, log) => sum + log.totalCalories, 0);
 
-        // Load hydration data from localStorage
-        const savedHydration = localStorage.getItem('hydration_data');
+        // Load hydration data from user-specific localStorage
+        const savedHydration = getUserItem('hydration_data');
         let waterIntake = 0;
         if (savedHydration) {
           try {
@@ -54,8 +61,8 @@ export default function Dashboard() {
           }
         }
 
-        // Load workout calories from localStorage
-        const savedWorkouts = localStorage.getItem('workout_calories');
+        // Load workout calories from user-specific localStorage
+        const savedWorkouts = getUserItem('workout_calories');
         let caloriesBurned = 0;
         if (savedWorkouts) {
           try {
@@ -84,7 +91,7 @@ export default function Dashboard() {
     // Refresh dashboard every 30 seconds to catch updates
     const interval = setInterval(loadDashboardData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   const caloriesRemaining = dashboardData.caloriesGoal - (dashboardData.caloriesConsumed - dashboardData.caloriesBurned);
   const caloriesPercentage = ((dashboardData.caloriesConsumed - dashboardData.caloriesBurned) / dashboardData.caloriesGoal) * 100;

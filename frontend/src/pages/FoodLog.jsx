@@ -2,20 +2,27 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FiCoffee, FiPlus, FiPieChart, FiTrash2 } from "react-icons/fi";
 import Navbar from "../components/Navbar";
-import { fetchFoodLogs, addFoodLog, deleteFoodLog } from "../services/api";
+import { useAuth, useUser } from "@clerk/clerk-react"; // Added Clerk hooks
+import { setAuthToken, fetchFoodLogs, addFoodLog, deleteFoodLog } from "../services/api"; // Added setAuthToken
 import calVisual from "../assets/calorie-tracking.png";
 
 export default function FoodLog() {
+  const { getToken } = useAuth();
+  const { user } = useUser();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newItem, setNewItem] = useState({ name: "", calories: "", mealType: "Breakfast" });
 
   useEffect(() => {
-    loadLogs();
-  }, []);
+    if (user) {
+      loadLogs();
+    }
+  }, [user]);
 
   const loadLogs = async () => {
     try {
+      const token = await getToken();
+      if (token) setAuthToken(token);
       const data = await fetchFoodLogs();
       setLogs(data);
     } catch (error) {

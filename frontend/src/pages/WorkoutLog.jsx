@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FiActivity, FiSearch, FiPlus, FiClipboard } from "react-icons/fi";
 import Navbar from "../components/Navbar";
-import { fetchWorkoutPlans, createWorkoutPlan } from "../services/api";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { setAuthToken, fetchWorkoutPlans, createWorkoutPlan } from "../services/api";
+import { getUserItem, setUserItem } from "../utils/userStorage";
 import workoutVisual from "../assets/workout-logistics.png";
 
 export default function WorkoutLog() {
+  const { getToken } = useAuth();
+  const { user } = useUser();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newPlan, setNewPlan] = useState({
@@ -16,11 +20,17 @@ export default function WorkoutLog() {
   });
 
   useEffect(() => {
-    loadPlans();
-  }, []);
+    if (user) {
+      loadPlans();
+    }
+  }, [user]); // Refetch when user changes
 
   const loadPlans = async () => {
     try {
+      const token = await getToken();
+      if (token) {
+        setAuthToken(token);
+      }
       const data = await fetchWorkoutPlans();
       setPlans(data);
     } catch (error) {
@@ -51,10 +61,10 @@ export default function WorkoutLog() {
 
       console.log('Plan created successfully:', result);
 
-      // Update calories burned in localStorage for dashboard
+      // Update calories burned in user-specific localStorage for dashboard
       if (newPlan.caloriesBurned) {
         const today = new Date().toDateString();
-        const savedWorkouts = localStorage.getItem('workout_calories');
+        const savedWorkouts = getUserItem('workout_calories');
         let totalCalories = parseInt(newPlan.caloriesBurned);
 
         if (savedWorkouts) {
@@ -68,11 +78,11 @@ export default function WorkoutLog() {
           }
         }
 
-        localStorage.setItem('workout_calories', JSON.stringify({
+        setUserItem('workout_calories', JSON.stringify({
           date: today,
           calories: totalCalories
         }));
-        console.log('Calories burned saved to localStorage:', totalCalories);
+        console.log('Calories burned saved to user-specific localStorage:', totalCalories);
       }
 
       setNewPlan({ name: "", description: "", duration: "", caloriesBurned: "" });

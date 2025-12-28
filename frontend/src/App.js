@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
-import { useAuth, SignedIn, SignedOut, SignIn, SignUp, RedirectToSignIn } from '@clerk/clerk-react';
-import { useEffect } from "react";
+import { useAuth, SignedIn, SignedOut, SignIn, SignUp, RedirectToSignIn, useUser } from '@clerk/clerk-react';
+import { useEffect, useRef } from "react";
 import { setAuthToken } from "./services/api";
+import { setCurrentUserId, clearAllUserData } from "./utils/userStorage";
 
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
@@ -17,17 +18,36 @@ import HydrationTracker from "./pages/HydrationTracker";
 // Component to Sync Clerk Token with API service
 const AuthInitializer = () => {
   const { getToken, isSignedIn } = useAuth();
+  const { user } = useUser();
+  const previousUserIdRef = useRef(null);
 
   useEffect(() => {
     const syncToken = async () => {
       try {
-        if (isSignedIn) {
+        if (isSignedIn && user) {
           const token = await getToken();
           console.log('Token synced:', token ? 'Token exists' : 'No token');
           setAuthToken(token);
+
+          // Set the current user ID for localStorage scoping
+          const currentUserId = user.id;
+
+          // Check if user has changed (account switch)
+          if (previousUserIdRef.current && previousUserIdRef.current !== currentUserId) {
+            console.log('User changed from', previousUserIdRef.current, 'to', currentUserId);
+            console.log('Clearing previous user data...');
+            clearAllUserData();
+          }
+
+          // Update the user ID
+          setCurrentUserId(currentUserId);
+          previousUserIdRef.current = currentUserId;
+
         } else {
           console.log('User not signed in, clearing token');
           setAuthToken(null);
+          setCurrentUserId(null);
+          previousUserIdRef.current = null;
         }
       } catch (error) {
         console.error('Error syncing token:', error);
@@ -38,7 +58,7 @@ const AuthInitializer = () => {
     // Interval to refresh token if needed
     const intervalId = setInterval(syncToken, 55000);
     return () => clearInterval(intervalId);
-  }, [getToken, isSignedIn]);
+  }, [getToken, isSignedIn, user]);
 
   return null;
 };
